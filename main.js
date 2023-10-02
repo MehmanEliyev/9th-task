@@ -13,12 +13,12 @@ fetch(`${BASE_URL}/get-data`)
     data.data.map((item) => {
       table.innerHTML += `
             <tr>
-                <th scope="row">${item.id}</th>
+                <th scope="row"></th>
                 <td>${item.userName}</td>
                 <td>${item.userEmail}</td>
                 <td>${item.userPassword}</td>
-                <td><button onclick="updateItem(${item.id})" class="btn btn-primary">Update</button></td>
-                <td><button onclick="deleteItem(${item.id})" class="btn btn-danger">Delete</button></td>
+                <td><button onclick="updateItem(${item.id})" class="btn btn-primary updateBtn">Update</button></td>
+                <td><button onclick="deleteItem(${item.id})" class="btn btn-danger deleteBtn">Delete</button></td>
             </tr>
             `;
     });
@@ -79,24 +79,74 @@ function deleteItem(id) {
 //! --------------- UPDATE -----------------------
 
 function updateItem(id) {
-    console.log(id);
-    
-    createBtn.disabled = true;
-    updateBtn.classList.remove("d-none");
-    
-    fetch(`${BASE_URL}/get-data:${id}`)
+  
+  const updateButton = document.querySelectorAll(".updateBtn");
+  const deleteBtn = document.querySelectorAll(".deleteBtn");
+  
+  updateButton.forEach((item)=>{
+    item.disabled = true;
+    item.style.transition = "1s";
+  })
+
+  deleteBtn.forEach((elem)=>{
+    elem.disabled = true;
+    elem.style.transition = "1s";
+  })
+  createBtn.disabled = true;
+  
+  // updateButton.style.transform = "translateY(-100px)";
+  // updateBtn.style.transition = "2s";
+
+  updateBtn.style.opacity = "1";
+  updateBtn.style.transition = "1s";
+
+
+  fetch(`${BASE_URL}/get-data`)
     .then((response) => response.json())
-    .then((data) => {
-        
-    //   userName.value = updData.userName;
-    //   userEmail.value = updData.userEmail;
-    //   userPassword.value = updData.userPassword;
+    .then((updData) => {
+      const { data } = updData;
+
+      data.forEach((element) => {
+        if (element.id === id) {
+          userName.value = element.userName;
+          userEmail.value = element.userEmail;
+          userPassword.value = element.userPassword;
+        }
+      });
     });
 
-//   fetch(`${BASE_URL}/update-data:${id}`, {
-//     method: "PUT",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//   });
+  updateBtn.addEventListener("click", () => {
+
+    if (
+      userName.value != "" &&
+      userEmail.value != "" &&
+      userPassword.value != ""
+    ) {
+      
+      let data = {
+        id: id,
+        userName: userName.value,
+        userEmail: userEmail.value,
+        userPassword: userPassword.value,
+      };
+  
+      fetch(`${BASE_URL}/update-data:${id}`, {
+        method: "Put",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((res) => {
+          location.reload();
+        });
+
+
+
+    }else{
+      alert("Fill the inputs");
+    }
+
+  });
 }
